@@ -1,0 +1,38 @@
+version: '2'
+networks: 
+  consul:
+
+services:
+  consul1:
+    image: consul
+    container_name: consul1
+    command: agent -server -bootstrap-expect=3 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1 -ui
+    networks:
+      - consul
+    ports:
+      - 8500:8500
+
+  consul2:
+    image: consul
+    container_name: consul2
+    command: agent -server -bootstrap-expect=3 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1 -ui -retry-join=consul1
+    networks:
+      - consul
+
+  consul3:
+    image: consul
+    container_name: consul3
+    command: agent -server -bootstrap-expect=3 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1 -ui -retry-join=consul1
+    networks:
+      - consul
+
+  consul4:
+    image: consul
+    container_name: consul4
+    depends_on:
+      - consul1
+      - consul2
+      - consul3
+    command: agent -client -bootstrap-expect=3 -bind=0.0.0.0 -client=0.0.0.0 -datacenter=dc1 -ui -retry-join=consul1
+    networks:
+      - consul
